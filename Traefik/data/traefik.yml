@@ -1,0 +1,30 @@
+api:
+  dashboard: true
+  debug: true
+entryPoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"
+  dns:
+    address: ":53"
+  mysql:
+    address: ":3306"
+serversTransport:
+  insecureSkipVerify: true
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+  file:
+    filename: /config.yml
+certificatesResolvers:
+  cloudflare:
+    acme:
+      email: your_email@mail.com
+      storage: acme.json
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - "nina.ns.cloudflare.com"
+          - "tate.ns.cloudflare.com"
