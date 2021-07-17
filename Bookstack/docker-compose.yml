@@ -10,7 +10,7 @@ services:
       - DB_USER=db_user
       - DB_PASS=passwd
       - DB_DATABASE=bookstackapp
-      - APP_URL=https://archives.stefanshome.ca
+      - APP_URL=https://bookstack.yourwebsite.ca
     volumes:
       - /home/bookstack/config:/config
     restart: unless-stopped
