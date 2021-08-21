@@ -1,0 +1,26 @@
+version: '3.3'
+services:
+    nginx-fpm-alpine:
+        restart: always
+        volumes:
+            - '/home/user/privatebin/cfg/conf.php:/srv/cfg/conf.php:ro'
+            - '/home/user/privatebin/data:/srv/data'
+        image: privatebin/nginx-fpm-alpine:latest
+        container_name: privatebin
+        networks:
+          - proxy
+        labels:
+          - "traefik.enable=true"
+          - "traefik.http.routers.privatebin.entrypoints=http"
+          - "traefik.http.routers.privatebin.rule=Host(`bin.yourwebsite.ca`)"
+          - "traefik.http.middlewares.privatebin-https-redirect.redirectscheme.scheme=https"
+          - "traefik.http.routers.privatebin.middlewares=privatebin-https-redirect"
+          - "traefik.http.routers.privatebin-secure.entrypoints=https"
+          - "traefik.http.routers.privatebin-secure.rule=Host(`bin.yourwebsite.ca`)"
+          - "traefik.http.routers.privatebin-secure.service=privatebin"
+          - "traefik.http.routers.privatebin-secure.tls=true"
+          - "traefik.http.services.privatebin.loadBalancer.server.port=8080"
+          - "traefik.docker.network=proxy"
+networks:
+  proxy:
+    external: true
