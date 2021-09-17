@@ -1,0 +1,54 @@
+version: "3"
+services:
+  mysql:
+    image: linuxserver/mariadb
+    container_name: snipe_mysql
+    restart: always
+    volumes:
+      - /home/user/snipe-it/mysql-config:/config
+    environment:
+      - PUID=puid
+      - PGID=pgid
+      - TZ=timezone
+      - MYSQL_ROOT_PASSWORD=passwd
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=passwd
+      - MYSQL_DATABASE=user
+    networks:
+      - proxy
+  snipeit:
+    image: linuxserver/snipe-it:latest
+    container_name: snipe-it
+    restart: always
+    depends_on:
+      - mysql
+    volumes:
+      - /home/user/snipe-it/snipe-it-config:/config
+    environment:
+      - NGINX_APP_URL=https://snipe-it.yourwebsite.ca
+      - MYSQL_PORT_3306_TCP_ADDR=mysql
+      - MYSQL_PORT_3306_TCP_PORT=3306
+      - MYSQL_DATABASE=user
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=passwd
+      - PGID=pgid
+      - PUID=puid
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.snipe-it.entrypoints=http"
+      - "traefik.http.routers.snipe-it.rule=Host(`snipe-it.yourwebsite.ca`)"
+      - "traefik.http.middlewares.snipe-it-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.snipe-it.middlewares=bookstack-https-redirect"
+      - "traefik.http.routers.snipe-it-secure.entrypoints=https"
+      - "traefik.http.routers.snipe-it-secure.rule=Host(`snipe-it.yourwebsite.ca`)"
+      - "traefik.http.routers.snipe-it-secure.service=snipe-it"
+      - "traefik.http.routers.snipe-it-secure.tls=true"
+      - "traefik.http.services.snipe-it.loadBalancer.server.port=80"
+      - "traefik.docker.network=proxy"
+
+networks:
+  proxy:
+    external:
+      name: proxy
